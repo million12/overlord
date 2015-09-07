@@ -1,0 +1,17 @@
+[Unit]
+Description=Kubernetes UI Replication Controller and UI service
+After=master-download-kubernetes@<ID>.service
+Requires=master-download-kubernetes@<ID>.service
+
+[Service]
+ExecStartPre=-/opt/bin/kubectl create -f https://kuar.io/kube-ui-rc.yaml
+ExecStart=/opt/bin/kubectl create -f https://kuar.io/kube-ui-svc.yaml
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+
+[X-Fleet]
+MachineMetadata=kubernetes_role=master
+MachineID=<ID>

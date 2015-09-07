@@ -59,6 +59,7 @@ func createMasterUnits(fleetMachine *FleetMachine) []string {
 
 	files := map[string]string{
 		"api":        "master-apiserver@.service",
+		"kubeui":     "master-ui-rc@.service",
 		"controller": "master-controller-manager@.service",
 		"scheduler":  "master-scheduler@.service",
 		"download":   "master-download-kubernetes@.service",
@@ -66,6 +67,23 @@ func createMasterUnits(fleetMachine *FleetMachine) []string {
 	}
 
 	createdFiles := []string{}
+
+	// Form kubeui service file
+	readfile, err := ioutil.ReadFile(
+		fmt.Sprintf("/templates/%s", files["kubeui"]))
+	goutils.PrintErrors(
+		goutils.ErrorParams{Err: err, CallerNum: 2, Fatal: false})
+	download := string(readfile)
+	download = strings.Replace(download, "<ID>", fleetMachine.ID, -1)
+
+  // Write kubeui service file
+	filename := strings.Replace(files["kubeui"], "@", "@"+fleetMachine.ID, -1)
+	download_file := fmt.Sprintf("%s/%s",
+		unitPathInfo[0]["path"], filename)
+	err = ioutil.WriteFile(download_file, []byte(download), 0644)
+	goutils.PrintErrors(
+		goutils.ErrorParams{Err: err, CallerNum: 2, Fatal: false})
+	createdFiles = append(createdFiles, download_file)
 
 	// Form download service file from template
 	readfile, err := ioutil.ReadFile(
